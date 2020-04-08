@@ -1,0 +1,27 @@
+[
+  {
+    "name": "mini-pack",
+    "coins": 5,
+    "price": 1
+  },
+  {
+    "name": "small-pack",
+    "coins": 50,
+    "price": 3
+  },
+  {
+    "name": "medium-pack",
+    "coins": 150,
+    "price": 6
+  },
+  {
+    "name": "mega-pack",
+    "coins": 500,
+    "price": 10
+  },
+  {
+    "name": "ultra-pack",
+    "coins": 1500,
+    "price": 15
+  }
+]
