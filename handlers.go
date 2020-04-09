@@ -34,36 +34,6 @@ func init() {
 
 }
 
-func loadOffers() (map[string]utils.TransactionTemplate, []byte) {
-
-	data, err := ioutil.ReadFile(OffersFile)
-	if err != nil {
-		log.Errorf("Error loading offers file ")
-		log.Fatal(err)
-		panic(err)
-	}
-
-	var offersArr []utils.TransactionTemplate
-	err = json.Unmarshal(data, &offersArr)
-
-	var offersMap = make(map[string]utils.TransactionTemplate, len(offersArr))
-	for _, offer := range offersArr {
-		offersMap[offer.Name] = offer
-	}
-
-	if err != nil {
-		log.Errorf("Error unmarshalling offer names")
-		log.Fatal(err)
-		panic(err)
-	}
-
-	log.Infof("Loaded %d offers.", len(offersArr))
-
-	marshaledOffers, _ = json.Marshal(offersArr)
-
-	return offersMap, marshaledOffers
-}
-
 func GetTransactionOffers(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write(marshaledOffers)
 }
@@ -165,6 +135,36 @@ func GetPerformedTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	_, _ = w.Write(toSend)
 
+}
+
+func loadOffers() (map[string]utils.TransactionTemplate, []byte) {
+
+	data, err := ioutil.ReadFile(OffersFile)
+	if err != nil {
+		log.Errorf("Error loading offers file ")
+		log.Fatal(err)
+		panic(err)
+	}
+
+	var offersArr []utils.TransactionTemplate
+	err = json.Unmarshal(data, &offersArr)
+
+	var offersMap = make(map[string]utils.TransactionTemplate, len(offersArr))
+	for _, offer := range offersArr {
+		offersMap[offer.Name] = offer
+	}
+
+	if err != nil {
+		log.Errorf("Error unmarshalling offer names")
+		log.Fatal(err)
+		panic(err)
+	}
+
+	log.Infof("Loaded %d offers.", len(offersArr))
+
+	marshaledOffers, _ = json.Marshal(offersArr)
+
+	return offersMap, marshaledOffers
 }
 
 func makeTransactionWithBankEntity(offer utils.TransactionTemplate) error {

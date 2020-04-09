@@ -135,7 +135,6 @@ func TestGetPerformedTransactions(t *testing.T) {
 }
 
 func RandomString(n int) string {
-
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 	rand.Seed(time.Now().Unix())
