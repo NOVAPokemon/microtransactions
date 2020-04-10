@@ -66,7 +66,7 @@ func TestMakeTransaction(t *testing.T) {
 		t.FailNow()
 	}
 
-	id, updatedTkn, err := transactionsClientTest.PerformTransaction(offers[len(offers)-1 ].Name, authClientTest.AuthToken, trainersClientTest.TrainerStatsToken)
+	id, updatedTkn, err := transactionsClientTest.PerformTransaction(offers[len(offers)-1].Name, authClientTest.AuthToken, trainersClientTest.TrainerStatsToken)
 
 	if err != nil {
 		logrus.Error(err)
