@@ -26,12 +26,12 @@ var (
 	// variables
 	offersMap       map[string]utils.TransactionTemplate
 	marshaledOffers []byte
-	trainersClient  = clients.NewTrainersClient(fmt.Sprintf("%s:%d", utils.Host, utils.TrainersPort))
 )
+
+var httpClient = &http.Client{}
 
 func init() {
 	offersMap, marshaledOffers = loadOffers()
-
 }
 
 func GetTransactionOffers(w http.ResponseWriter, _ *http.Request) {
@@ -63,6 +63,7 @@ func MakeTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	trainersClient := clients.NewTrainersClient(fmt.Sprintf("%s:%d", utils.Host, utils.TrainersPort), httpClient)
 	valid, err := trainersClient.VerifyTrainerStats(authToken.Username, trainerStatsToken.TrainerHash, r.Header.Get(tokens.AuthTokenHeaderName))
 	if err != nil || !*valid {
 		log.Error(err)
@@ -103,12 +104,6 @@ func MakeTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = trainersClient.GetTrainerStatsToken(authToken.Username, r.Header.Get(tokens.AuthTokenHeaderName))
-
-	if err != nil {
-		http.Error(w, "Error fetching trainer stats token", http.StatusInternalServerError)
-		return
-	}
 	log.Infof("Previous Coins: %d", trainerStatsToken.TrainerStats.Coins)
 	log.Infof("Updated Coins: %d", newStats.Coins)
 

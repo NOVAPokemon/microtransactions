@@ -7,13 +7,44 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
+	"net/http"
+	"os"
 	"testing"
 	"time"
 )
 
 var authClientTest = clients.NewAuthClient(fmt.Sprintf("%s:%d", utils.Host, utils.AuthenticationPort))
-var trainersClientTest = clients.NewTrainersClient(fmt.Sprintf("%s:%d", utils.Host, utils.TrainersPort))
+var trainersClientTest = clients.NewTrainersClient(fmt.Sprintf("%s:%d", utils.Host, utils.TrainersPort), &http.Client{})
 var transactionsClientTest = clients.NewMicrotransactionsClient(fmt.Sprintf("%s:%d", utils.Host, utils.MicrotransactionsPort))
+
+func TestMain(m *testing.M) {
+
+	username := RandomString(10)
+	password := RandomString(10)
+	err := authClientTest.Register(username, password)
+
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	err = authClientTest.LoginWithUsernameAndPassword(username, password)
+
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	err = trainersClientTest.GetAllTrainerTokens(username, authClientTest.AuthToken)
+
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	res := m.Run()
+	os.Exit(res)
+}
 
 // Location should be added
 func TestGetOffers(t *testing.T) {
@@ -31,32 +62,6 @@ func TestGetOffers(t *testing.T) {
 
 // Location should be added
 func TestMakeTransaction(t *testing.T) {
-
-	username := RandomString(10)
-	password := RandomString(10)
-	err := authClientTest.Register(username, password)
-
-	if err != nil {
-		logrus.Error(err)
-		t.FailNow()
-		return
-	}
-
-	err = authClientTest.LoginWithUsernameAndPassword(username, password)
-
-	if err != nil {
-		logrus.Error(err)
-		t.FailNow()
-		return
-	}
-
-	err = trainersClientTest.GetTrainerStatsToken(username, authClientTest.AuthToken)
-
-	if err != nil {
-		logrus.Error(err)
-		t.FailNow()
-		return
-	}
 
 	offers, err := transactionsClientTest.GetOffers()
 
@@ -96,8 +101,8 @@ func TestMakeTransaction(t *testing.T) {
 
 	assert.True(t, contains)
 
-	if updatedTkn == trainersClient.TrainerStatsToken {
-		t.Log("Token sent: " + trainersClient.TrainerStatsToken)
+	if updatedTkn == trainersClientTest.TrainerStatsToken {
+		t.Log("Token sent: " + trainersClientTest.TrainerStatsToken)
 		t.Log("Token rcvd: " + updatedTkn)
 		t.Error("Stats token did not update")
 		t.Fail()
@@ -106,24 +111,6 @@ func TestMakeTransaction(t *testing.T) {
 
 func TestGetPerformedTransactions(t *testing.T) {
 
-	username := RandomString(10)
-	password := RandomString(10)
-	err := authClientTest.Register(username, password)
-
-	if err != nil {
-		logrus.Error(err)
-		t.FailNow()
-		return
-	}
-
-	err = authClientTest.LoginWithUsernameAndPassword(username, password)
-
-	if err != nil {
-		logrus.Error(err)
-		t.FailNow()
-		return
-	}
-
 	performedTransactions, err := transactionsClientTest.GetTransactionRecords(authClientTest.AuthToken)
 
 	if err != nil {
@@ -131,7 +118,7 @@ func TestGetPerformedTransactions(t *testing.T) {
 		t.FailNow()
 		return
 	}
-	assert.Empty(t, performedTransactions)
+	assert.IsType(t, []utils.TransactionRecord{}, performedTransactions)
 }
 
 func RandomString(n int) string {
