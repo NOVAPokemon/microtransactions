@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var authClientTest = clients.AuthClient{}
+var authClientTest = clients.NewAuthClient(fmt.Sprintf("%s:%d", utils.Host, utils.AuthenticationPort))
 var trainersClientTest = clients.NewTrainersClient(fmt.Sprintf("%s:%d", utils.Host, utils.TrainersPort))
 var transactionsClientTest = clients.NewMicrotransactionsClient(fmt.Sprintf("%s:%d", utils.Host, utils.MicrotransactionsPort))
 
