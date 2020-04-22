@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/clients"
 	"github.com/sirupsen/logrus"
@@ -13,9 +12,9 @@ import (
 	"time"
 )
 
-var authClientTest = clients.NewAuthClient(fmt.Sprintf("%s:%d", utils.Host, utils.AuthenticationPort))
-var trainersClientTest = clients.NewTrainersClient(fmt.Sprintf("%s:%d", utils.Host, utils.TrainersPort), &http.Client{})
-var transactionsClientTest = clients.NewMicrotransactionsClient(fmt.Sprintf("%s:%d", utils.Host, utils.MicrotransactionsPort))
+var authClientTest = clients.NewAuthClient()
+var trainersClientTest = clients.NewTrainersClient(&http.Client{})
+var transactionsClientTest = clients.NewMicrotransactionsClient()
 
 func TestMain(m *testing.M) {
 
