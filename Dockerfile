@@ -7,4 +7,7 @@ WORKDIR /service
 COPY $executable .
 COPY microtransaction_offers.json .
 
-ENTRYPOINT ./$executable
+COPY dockerize .
+RUN chmod +x dockerize
+
+CMD ["$executable"]
