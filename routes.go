@@ -13,7 +13,7 @@ const GetTransactionOffersName = "GET_TRANSACTION_OFFERs"
 const GetPerformedTransactionsName = "GET_PERFORMED_TRANSACTIONS"
 
 var routes = utils.Routes{
-
+	api.DefaultRoute,
 	utils.Route{
 		Name:        GetTransactionOffersName,
 		Method:      GET,
