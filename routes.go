@@ -9,7 +9,7 @@ const GET = "GET"
 const POST = "POST"
 
 const MakeTransactionName = "MAKE_TRANSACTION"
-const GetTransactionOffersName = "GET_TRANSACTION_OFFERs"
+const GetTransactionOffersName = "GET_TRANSACTION_OFFERS"
 const GetPerformedTransactionsName = "GET_PERFORMED_TRANSACTIONS"
 
 var routes = utils.Routes{
