@@ -77,7 +77,7 @@ func MakeTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	makeTransactionWithBankEntity(offer)
-	
+
 	transactionRecord := utils.TransactionRecord{
 		TemplateName: offer.Name,
 		User:         authToken.Username,
