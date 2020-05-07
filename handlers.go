@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/api"
 	"github.com/NOVAPokemon/utils/clients"
@@ -19,9 +18,6 @@ import (
 const OffersFile = "microtransaction_offers.json"
 
 var (
-	// errors
-	OfferNotFound = errors.New("offer not found")
-
 	// variables
 	offersMap       map[string]utils.TransactionTemplate
 	marshaledOffers []byte
@@ -30,53 +26,57 @@ var (
 var httpClient = &http.Client{}
 
 func init() {
-	offersMap, marshaledOffers = loadOffers()
+	var err error
+	offersMap, marshaledOffers, err = loadOffers()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func GetTransactionOffers(w http.ResponseWriter, _ *http.Request) {
-	_, _ = w.Write(marshaledOffers)
+	_, err := w.Write(marshaledOffers)
+	if err != nil {
+		utils.LogAndSendHTTPError(&w, wrapGetTransactionsError(err), http.StatusInternalServerError)
+	}
 }
 
 func MakeTransaction(w http.ResponseWriter, r *http.Request) {
+	offerId := mux.Vars(r)[api.OfferIdPathVar]
+	log.Infof("Got transaction request for offer: %s", offerId)
 
-	log.Infof("Got transaction request for offer: %s", mux.Vars(r)[api.OfferIdPathVar])
-	offer, ok := offersMap[mux.Vars(r)[api.OfferIdPathVar]]
-
+	offer, ok := offersMap[offerId]
 	if !ok {
-		log.Infof("offer %s not found", mux.Vars(r)[api.OfferIdPathVar])
-		http.Error(w, OfferNotFound.Error(), http.StatusNotFound)
+		err := wrapMakeTransactionError(newOfferNotFoundError(offerId))
+		utils.LogAndSendHTTPError(&w, err, http.StatusNotFound)
 		return
 	}
 
 	authToken, err := tokens.ExtractAndVerifyAuthToken(r.Header)
 	if err != nil {
-		log.Error(err)
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusUnauthorized)
 		return
 	}
 
 	trainerStatsToken, err := tokens.ExtractAndVerifyTrainerStatsToken(r.Header)
 	if err != nil {
-		log.Error(err)
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusUnauthorized)
 		return
 	}
 
 	trainersClient := clients.NewTrainersClient(httpClient)
 	valid, err := trainersClient.VerifyTrainerStats(authToken.Username, trainerStatsToken.TrainerHash, r.Header.Get(tokens.AuthTokenHeaderName))
-	if err != nil || !*valid {
-		log.Error(err)
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	err = makeTransactionWithBankEntity(offer)
-
 	if err != nil {
-		log.Error(err)
-		http.Error(w, "Error occurred making transaction", http.StatusInternalServerError)
+		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusUnauthorized)
 		return
 	}
+
+	if !*valid {
+		err = wrapMakeTransactionError(tokens.ErrorInvalidStatsToken)
+		utils.LogAndSendHTTPError(&w, err, http.StatusUnauthorized)
+		return
+	}
+
+	makeTransactionWithBankEntity(offer)
 
 	transactionRecord := utils.TransactionRecord{
 		TemplateName: offer.Name,
@@ -84,10 +84,8 @@ func MakeTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id, err := transactionDB.AddTransaction(transactionRecord)
-
 	if err != nil {
-		log.Error(err)
-		http.Error(w, "Error occurred storing transaction", http.StatusInternalServerError)
+		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
 		return
 	}
 
@@ -96,10 +94,10 @@ func MakeTransaction(w http.ResponseWriter, r *http.Request) {
 		Coins: trainerStatsToken.TrainerStats.Coins + offer.Coins,
 	}
 
-	newStats, err := trainersClient.UpdateTrainerStats(authToken.Username, newTrainerStats, r.Header.Get(tokens.AuthTokenHeaderName))
-
+	newStats, err := trainersClient.UpdateTrainerStats(authToken.Username, newTrainerStats,
+		r.Header.Get(tokens.AuthTokenHeaderName))
 	if err != nil {
-		http.Error(w, "Error fetching trainer stats", http.StatusInternalServerError)
+		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
 		return
 	}
 
@@ -107,64 +105,76 @@ func MakeTransaction(w http.ResponseWriter, r *http.Request) {
 	log.Infof("Updated Coins: %d", newStats.Coins)
 
 	w.Header().Set(tokens.StatsTokenHeaderName, trainersClient.TrainerStatsToken)
-	toSend, _ := id.MarshalJSON()
-	_, _ = w.Write(toSend)
+	toSend, err := id.MarshalJSON()
+	if err != nil {
+		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(toSend)
+	if err != nil {
+		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
+	}
 }
 
 func GetPerformedTransactions(w http.ResponseWriter, r *http.Request) {
-
 	authToken, err := tokens.ExtractAndVerifyAuthToken(r.Header)
 	if err != nil {
-		log.Error(err)
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		utils.LogAndSendHTTPError(&w, wrapGetPerfomedTransactionsError(err), http.StatusUnauthorized)
 		return
 	}
+
 	performedTransactions, err := transactionDB.GetTransactionsFromUser(authToken.Username)
+	if err != nil {
+		utils.LogAndSendHTTPError(&w, wrapGetPerfomedTransactionsError(err), http.StatusInternalServerError)
+		return
+	}
 
 	toSend, err := json.Marshal(performedTransactions)
-
 	if err != nil {
-		log.Errorf("error occurred decoding :%s", performedTransactions)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.LogAndSendHTTPError(&w, wrapGetPerfomedTransactionsError(err), http.StatusUnauthorized)
+		return
 	}
-	_, _ = w.Write(toSend)
 
+	_, err = w.Write(toSend)
+	if err != nil {
+		utils.LogAndSendHTTPError(&w, wrapGetPerfomedTransactionsError(err), http.StatusUnauthorized)
+	}
 }
 
-func loadOffers() (map[string]utils.TransactionTemplate, []byte) {
-
+func loadOffers() (map[string]utils.TransactionTemplate, []byte, error) {
 	data, err := ioutil.ReadFile(OffersFile)
 	if err != nil {
-		log.Errorf("Error loading offers file ")
-		log.Fatal(err)
-		panic(err)
+		return nil, nil, wrapLoadOffersError(err)
 	}
 
 	var offersArr []utils.TransactionTemplate
 	err = json.Unmarshal(data, &offersArr)
+	if err != nil {
+		return nil, nil, wrapLoadOffersError(err)
+	}
 
 	var offersMap = make(map[string]utils.TransactionTemplate, len(offersArr))
 	for _, offer := range offersArr {
 		offersMap[offer.Name] = offer
 	}
 
-	if err != nil {
-		log.Errorf("Error unmarshalling offer names")
-		log.Fatal(err)
-		panic(err)
-	}
-
 	log.Infof("Loaded %d offers.", len(offersArr))
 
-	marshaledOffers, _ = json.Marshal(offersArr)
+	marshaledOffers, err = json.Marshal(offersArr)
+	if err != nil {
+		return nil, nil, wrapLoadOffersError(err)
+	}
 
-	return offersMap, marshaledOffers
+	return offersMap, marshaledOffers, nil
 }
 
-func makeTransactionWithBankEntity(offer utils.TransactionTemplate) error {
+func makeTransactionWithBankEntity(offer utils.TransactionTemplate) {
 	log.Infof("Making transaction %s", offer.Name)
+
 	rand.Seed(time.Now().UnixNano())
 	n := rand.Intn(1500)
 	time.Sleep(time.Duration(n) * time.Millisecond)
-	return nil
+
+	return
 }
