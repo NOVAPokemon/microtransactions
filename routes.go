@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/api"
+	"strings"
 )
 
 const GET = "GET"
@@ -13,7 +14,7 @@ const GetTransactionOffersName = "GET_TRANSACTION_OFFERS"
 const GetPerformedTransactionsName = "GET_PERFORMED_TRANSACTIONS"
 
 var routes = utils.Routes{
-	api.DefaultRoute,
+	api.GenStatusRoute(strings.ToLower(serviceName)),
 	utils.Route{
 		Name:        GetTransactionOffersName,
 		Method:      GET,
