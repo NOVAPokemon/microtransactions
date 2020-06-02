@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	host = utils.ServeHost
-	port = utils.MicrotransactionsPort
+	host        = utils.ServeHost
+	port        = utils.MicrotransactionsPort
 	serviceName = "MICROTRANSACTIONS"
 )
 

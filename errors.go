@@ -21,7 +21,7 @@ func wrapMakeTransactionError(err error) error {
 	return errors.Wrap(err, fmt.Sprintf(utils.ErrorInHandlerFormat, MakeTransactionName))
 }
 
-func wrapGetPerfomedTransactionsError(err error) error{
+func wrapGetPerfomedTransactionsError(err error) error {
 	return errors.Wrap(err, fmt.Sprintf(utils.ErrorInHandlerFormat, GetPerformedTransactionsName))
 }
 
