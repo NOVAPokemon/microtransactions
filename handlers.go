@@ -2,6 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"math/rand"
+	"net/http"
+	"time"
+
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/api"
 	"github.com/NOVAPokemon/utils/clients"
@@ -9,10 +14,6 @@ import (
 	"github.com/NOVAPokemon/utils/tokens"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"math/rand"
-	"net/http"
-	"time"
 )
 
 const OffersFile = "microtransaction_offers.json"

@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/NOVAPokemon/utils"
-	"github.com/NOVAPokemon/utils/clients"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"net/http"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/NOVAPokemon/utils"
+	"github.com/NOVAPokemon/utils/clients"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 var authClientTest = clients.NewAuthClient()
