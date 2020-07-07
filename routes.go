@@ -7,33 +7,37 @@ import (
 	"github.com/NOVAPokemon/utils/api"
 )
 
-const GET = "GET"
-const POST = "POST"
+const (
+	makeTransactionName          = "MAKE_TRANSACTION"
+	getTransactionOffersName     = "GET_TRANSACTION_OFFERS"
+	getPerformedTransactionsName = "GET_PERFORMED_TRANSACTIONS"
+)
 
-const MakeTransactionName = "MAKE_TRANSACTION"
-const GetTransactionOffersName = "GET_TRANSACTION_OFFERS"
-const GetPerformedTransactionsName = "GET_PERFORMED_TRANSACTIONS"
+const (
+	get  = "GET"
+	post = "POST"
+)
 
 var routes = utils.Routes{
 	api.GenStatusRoute(strings.ToLower(serviceName)),
 	utils.Route{
-		Name:        GetTransactionOffersName,
-		Method:      GET,
+		Name:        getTransactionOffersName,
+		Method:      get,
 		Pattern:     api.GetTransactionOffersRoute,
-		HandlerFunc: GetTransactionOffers,
+		HandlerFunc: getTransactionOffers,
 	},
 
 	utils.Route{
-		Name:        GetPerformedTransactionsName,
-		Method:      GET,
+		Name:        getPerformedTransactionsName,
+		Method:      get,
 		Pattern:     api.GetPerformedTransactionsRoute,
-		HandlerFunc: GetPerformedTransactions,
+		HandlerFunc: getPerformedTransactions,
 	},
 
 	utils.Route{
-		Name:        MakeTransactionName,
-		Method:      POST,
+		Name:        makeTransactionName,
+		Method:      post,
 		Pattern:     api.MakeTransactionRoute,
-		HandlerFunc: MakeTransaction,
+		HandlerFunc: makeTransaction,
 	},
 }

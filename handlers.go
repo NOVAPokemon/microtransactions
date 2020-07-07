@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const OffersFile = "microtransaction_offers.json"
+const offersFile = "microtransaction_offers.json"
 
 var (
 	// variables
@@ -34,14 +34,14 @@ func init() {
 	}
 }
 
-func GetTransactionOffers(w http.ResponseWriter, _ *http.Request) {
+func getTransactionOffers(w http.ResponseWriter, _ *http.Request) {
 	_, err := w.Write(marshaledOffers)
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapGetTransactionsError(err), http.StatusInternalServerError)
 	}
 }
 
-func MakeTransaction(w http.ResponseWriter, r *http.Request) {
+func makeTransaction(w http.ResponseWriter, r *http.Request) {
 	offerId := mux.Vars(r)[api.OfferIdPathVar]
 	log.Infof("Got transaction request for offer: %s", offerId)
 
@@ -118,7 +118,7 @@ func MakeTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetPerformedTransactions(w http.ResponseWriter, r *http.Request) {
+func getPerformedTransactions(w http.ResponseWriter, r *http.Request) {
 	authToken, err := tokens.ExtractAndVerifyAuthToken(r.Header)
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapGetPerfomedTransactionsError(err), http.StatusUnauthorized)
@@ -144,7 +144,7 @@ func GetPerformedTransactions(w http.ResponseWriter, r *http.Request) {
 }
 
 func loadOffers() (map[string]utils.TransactionTemplate, []byte, error) {
-	data, err := ioutil.ReadFile(OffersFile)
+	data, err := ioutil.ReadFile(offersFile)
 	if err != nil {
 		return nil, nil, wrapLoadOffersError(err)
 	}
@@ -155,9 +155,9 @@ func loadOffers() (map[string]utils.TransactionTemplate, []byte, error) {
 		return nil, nil, wrapLoadOffersError(err)
 	}
 
-	var offersMap = make(map[string]utils.TransactionTemplate, len(offersArr))
+	var offersMapAux = make(map[string]utils.TransactionTemplate, len(offersArr))
 	for _, offer := range offersArr {
-		offersMap[offer.Name] = offer
+		offersMapAux[offer.Name] = offer
 	}
 
 	log.Infof("Loaded %d offers.", len(offersArr))
@@ -167,7 +167,7 @@ func loadOffers() (map[string]utils.TransactionTemplate, []byte, error) {
 		return nil, nil, wrapLoadOffersError(err)
 	}
 
-	return offersMap, marshaledOffers, nil
+	return offersMapAux, marshaledOffers, nil
 }
 
 func makeTransactionWithBankEntity(offer utils.TransactionTemplate) {

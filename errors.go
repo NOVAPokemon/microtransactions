@@ -9,21 +9,20 @@ import (
 
 const (
 	errorOfferNotFoundFormat = "offer %s not found"
-
 	errorLoadOffers = "error loading offers"
 )
 
 // Handler wrappers
 func wrapGetTransactionsError(err error) error {
-	return errors.Wrap(err, fmt.Sprintf(utils.ErrorInHandlerFormat, GetTransactionOffersName))
+	return errors.Wrap(err, fmt.Sprintf(utils.ErrorInHandlerFormat, getTransactionOffersName))
 }
 
 func wrapMakeTransactionError(err error) error {
-	return errors.Wrap(err, fmt.Sprintf(utils.ErrorInHandlerFormat, MakeTransactionName))
+	return errors.Wrap(err, fmt.Sprintf(utils.ErrorInHandlerFormat, makeTransactionName))
 }
 
 func wrapGetPerfomedTransactionsError(err error) error {
-	return errors.Wrap(err, fmt.Sprintf(utils.ErrorInHandlerFormat, GetPerformedTransactionsName))
+	return errors.Wrap(err, fmt.Sprintf(utils.ErrorInHandlerFormat, getPerformedTransactionsName))
 }
 
 // Other wrappers
