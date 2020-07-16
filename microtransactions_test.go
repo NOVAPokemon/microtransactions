@@ -13,9 +13,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var authClientTest = clients.NewAuthClient()
-var trainersClientTest = clients.NewTrainersClient(&http.Client{})
-var transactionsClientTest = clients.NewMicrotransactionsClient()
+var (
+	authClientTest         = clients.NewAuthClient(commsManager)
+	trainersClientTest     = clients.NewTrainersClient(&http.Client{}, commsManager)
+	transactionsClientTest = clients.NewMicrotransactionsClient(commsManager)
+)
 
 func TestMain(m *testing.M) {
 
