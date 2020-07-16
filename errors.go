@@ -9,7 +9,7 @@ import (
 
 const (
 	errorOfferNotFoundFormat = "offer %s not found"
-	errorLoadOffers = "error loading offers"
+	errorLoadOffers          = "error loading offers"
 )
 
 // Handler wrappers

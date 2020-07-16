@@ -22,10 +22,10 @@ const offersFile = "microtransaction_offers.json"
 
 var (
 	// variables
-	offersMap           map[string]utils.TransactionTemplate
-	marshaledOffers     []byte
-	serverName          string
-	commsManager        comms_manager.CommunicationManager
+	offersMap       map[string]utils.TransactionTemplate
+	marshaledOffers []byte
+	serverName      string
+	commsManager    comms_manager.CommunicationManager
 )
 
 var httpClient = &http.Client{}
