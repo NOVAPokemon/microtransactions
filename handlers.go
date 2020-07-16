@@ -13,6 +13,7 @@ import (
 	"github.com/NOVAPokemon/utils/clients"
 	transactionDB "github.com/NOVAPokemon/utils/database/transactions"
 	"github.com/NOVAPokemon/utils/tokens"
+	"github.com/NOVAPokemon/utils/websockets"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
@@ -24,7 +25,7 @@ var (
 	offersMap       map[string]utils.TransactionTemplate
 	marshaledOffers []byte
 	serverName      string
-	commsManager    utils.CommunicationManager
+	commsManager    websockets.CommunicationManager
 )
 
 var httpClient = &http.Client{}
