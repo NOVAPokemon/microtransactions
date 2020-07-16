@@ -5,11 +5,13 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/api"
 	"github.com/NOVAPokemon/utils/clients"
+	"github.com/NOVAPokemon/utils/comms_manager"
 	transactionDB "github.com/NOVAPokemon/utils/database/transactions"
 	"github.com/NOVAPokemon/utils/tokens"
 	"github.com/gorilla/mux"
@@ -20,13 +22,23 @@ const offersFile = "microtransaction_offers.json"
 
 var (
 	// variables
-	offersMap       map[string]utils.TransactionTemplate
-	marshaledOffers []byte
+	offersMap           map[string]utils.TransactionTemplate
+	marshaledOffers     []byte
+	serverName          string
+	commsManager        comms_manager.CommunicationManager
 )
 
 var httpClient = &http.Client{}
 
 func init() {
+	if aux, exists := os.LookupEnv(utils.HostnameEnvVar); exists {
+		serverName = aux
+	} else {
+		log.Fatal("could not load server name")
+	}
+
+	log.Info("Server name : ", serverName)
+
 	var err error
 	offersMap, marshaledOffers, err = loadOffers()
 	if err != nil {
@@ -64,7 +76,7 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trainersClient := clients.NewTrainersClient(httpClient)
+	trainersClient := clients.NewTrainersClient(httpClient, commsManager)
 	valid, err := trainersClient.VerifyTrainerStats(authToken.Username, trainerStatsToken.TrainerHash, r.Header.Get(tokens.AuthTokenHeaderName))
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusUnauthorized)
