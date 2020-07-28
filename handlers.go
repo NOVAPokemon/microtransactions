@@ -119,7 +119,13 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set(tokens.StatsTokenHeaderName, trainersClient.TrainerStatsToken)
 
-	_, err = w.Write([]byte(*id))
+	toSend, err := json.Marshal(*id)
+	if err != nil {
+		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(toSend)
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
 	}
