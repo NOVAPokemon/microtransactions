@@ -118,13 +118,8 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 	log.Infof("Updated Coins: %d", newStats.Coins)
 
 	w.Header().Set(tokens.StatsTokenHeaderName, trainersClient.TrainerStatsToken)
-	toSend, err := id.MarshalJSON()
-	if err != nil {
-		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
-		return
-	}
 
-	_, err = w.Write(toSend)
+	_, err = w.Write([]byte(*id))
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
 	}

@@ -95,7 +95,7 @@ func TestMakeTransaction(t *testing.T) {
 	contains := false
 
 	for _, transaction := range performedTransactions {
-		if transaction.Id.Hex() == id.Hex() {
+		if transaction.Id == id.Hex() {
 			contains = true
 			break
 		}
