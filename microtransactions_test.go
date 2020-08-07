@@ -2,7 +2,7 @@ package main
 
 import (
 	"math/rand"
-	"net/http"
+	http "github.com/bruno-anjos/archimedesHTTPClient"
 	"os"
 	"testing"
 	"time"
