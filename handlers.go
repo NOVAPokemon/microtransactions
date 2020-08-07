@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"math/rand"
-	"net/http"
+	http "github.com/bruno-anjos/archimedesHTTPClient"
+	originalHttp "net/http"
 	"os"
 	"time"
 
@@ -46,14 +47,14 @@ func init() {
 	}
 }
 
-func getTransactionOffers(w http.ResponseWriter, _ *http.Request) {
+func getTransactionOffers(w originalHttp.ResponseWriter, _ *originalHttp.Request) {
 	_, err := w.Write(marshaledOffers)
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapGetTransactionsError(err), http.StatusInternalServerError)
 	}
 }
 
-func makeTransaction(w http.ResponseWriter, r *http.Request) {
+func makeTransaction(w originalHttp.ResponseWriter, r *originalHttp.Request) {
 	offerId := mux.Vars(r)[api.OfferIdPathVar]
 	log.Infof("Got transaction request for offer: %s", offerId)
 
@@ -131,7 +132,7 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getPerformedTransactions(w http.ResponseWriter, r *http.Request) {
+func getPerformedTransactions(w originalHttp.ResponseWriter, r *originalHttp.Request) {
 	authToken, err := tokens.ExtractAndVerifyAuthToken(r.Header)
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapGetPerfomedTransactionsError(err), http.StatusUnauthorized)
