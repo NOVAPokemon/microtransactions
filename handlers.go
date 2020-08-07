@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"math/rand"
-	http "github.com/bruno-anjos/archimedesHTTPClient"
-	originalHttp "net/http"
 	"os"
 	"time"
+
+	http "github.com/bruno-anjos/archimedesHTTPClient"
 
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/api"
@@ -47,14 +47,14 @@ func init() {
 	}
 }
 
-func getTransactionOffers(w originalHttp.ResponseWriter, _ *originalHttp.Request) {
+func getTransactionOffers(w http.ResponseWriter, _ *http.Request) {
 	_, err := w.Write(marshaledOffers)
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapGetTransactionsError(err), http.StatusInternalServerError)
 	}
 }
 
-func makeTransaction(w originalHttp.ResponseWriter, r *originalHttp.Request) {
+func makeTransaction(w http.ResponseWriter, r *http.Request) {
 	offerId := mux.Vars(r)[api.OfferIdPathVar]
 	log.Infof("Got transaction request for offer: %s", offerId)
 
@@ -132,7 +132,7 @@ func makeTransaction(w originalHttp.ResponseWriter, r *originalHttp.Request) {
 	}
 }
 
-func getPerformedTransactions(w originalHttp.ResponseWriter, r *originalHttp.Request) {
+func getPerformedTransactions(w http.ResponseWriter, r *http.Request) {
 	authToken, err := tokens.ExtractAndVerifyAuthToken(r.Header)
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapGetPerfomedTransactionsError(err), http.StatusUnauthorized)
