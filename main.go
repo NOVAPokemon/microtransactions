@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NOVAPokemon/utils"
+	transactionDB "github.com/NOVAPokemon/utils/database/transactions"
 )
 
 const (
@@ -24,5 +25,6 @@ func main() {
 		commsManager = utils.CreateDefaultDelayedManager(locationTag, false)
 	}
 
+	transactionDB.InitTransactionsDBClient(*flags.ArchimedesEnabled)
 	utils.StartServer(serviceName, host, port, routes, commsManager)
 }
