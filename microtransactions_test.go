@@ -81,7 +81,7 @@ func TestMakeTransaction(t *testing.T) {
 		t.FailNow()
 	}
 
-	t.Logf("Made transaction: %s", id)
+	t.Logf("Made transaction: %s", *id)
 
 	performedTransactions, err := transactionsClientTest.GetTransactionRecords(authClientTest.AuthToken)
 
