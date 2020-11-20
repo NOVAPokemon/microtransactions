@@ -8,6 +8,7 @@ import (
 	"time"
 
 	http "github.com/bruno-anjos/archimedesHTTPClient"
+	"github.com/golang/geo/s2"
 
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/api"
@@ -37,6 +38,13 @@ func init() {
 	} else {
 		log.Fatal("could not load server name")
 	}
+
+	location, exists := os.LookupEnv("LOCATION")
+	if !exists {
+		log.Fatalf("no location in environment")
+	}
+
+	httpClient.InitArchimedesClient("localhost", http.DefaultArchimedesPort, s2.CellIDFromToken(location).LatLng())
 
 	log.Info("Server name : ", serverName)
 
