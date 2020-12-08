@@ -7,15 +7,13 @@ import (
 	"os"
 	"time"
 
-	http "github.com/bruno-anjos/archimedesHTTPClient"
-	"github.com/golang/geo/s2"
-
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/api"
 	"github.com/NOVAPokemon/utils/clients"
 	transactionDB "github.com/NOVAPokemon/utils/database/transactions"
 	"github.com/NOVAPokemon/utils/tokens"
 	"github.com/NOVAPokemon/utils/websockets"
+	http "github.com/bruno-anjos/archimedesHTTPClient"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
@@ -28,9 +26,8 @@ var (
 	marshaledOffers []byte
 	serverName      string
 	commsManager    websockets.CommunicationManager
+	httpClient      = &http.Client{}
 )
-
-var httpClient = &http.Client{}
 
 func init() {
 	if aux, exists := os.LookupEnv(utils.HostnameEnvVar); exists {
@@ -39,14 +36,7 @@ func init() {
 		log.Fatal("could not load server name")
 	}
 
-	location, exists := os.LookupEnv("LOCATION")
-	if !exists {
-		log.Fatalf("no location in environment")
-	}
-
-	httpClient.InitArchimedesClient("localhost", http.DefaultArchimedesPort, s2.CellIDFromToken(location).LatLng())
-
-	log.Info("Server name : ", serverName)
+	log.Info("Server name: ", serverName)
 
 	var err error
 	offersMap, marshaledOffers, err = loadOffers()
