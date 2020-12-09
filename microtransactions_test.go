@@ -2,10 +2,11 @@ package main
 
 import (
 	"math/rand"
-	http "github.com/bruno-anjos/archimedesHTTPClient"
 	"os"
 	"testing"
 	"time"
+
+	http "github.com/bruno-anjos/archimedesHTTPClient"
 
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/clients"
