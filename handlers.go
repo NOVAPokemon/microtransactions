@@ -16,6 +16,7 @@ import (
 	http "github.com/bruno-anjos/archimedesHTTPClient"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	originalHTTP "net/http"
 )
 
 const offersFile = "microtransaction_offers.json"
@@ -26,7 +27,7 @@ var (
 	marshaledOffers []byte
 	serverName      string
 	commsManager    websockets.CommunicationManager
-	httpClient      = &http.Client{}
+	httpClient      = &http.Client{Client: originalHTTP.Client{Timeout: clients.RequestTimeout}}
 )
 
 func init() {

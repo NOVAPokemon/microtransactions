@@ -12,11 +12,12 @@ import (
 	"github.com/NOVAPokemon/utils/clients"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	originalHTTP "net/http"
 )
 
 var (
 	authClientTest         = clients.NewAuthClient(commsManager, httpClient)
-	trainersClientTest     = clients.NewTrainersClient(&http.Client{}, commsManager)
+	trainersClientTest     = clients.NewTrainersClient(&http.Client{Client: originalHTTP.Client{Timeout: clients.RequestTimeout}}, commsManager)
 	transactionsClientTest = clients.NewMicrotransactionsClient(commsManager, httpClient)
 )
 
