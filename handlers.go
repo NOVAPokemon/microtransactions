@@ -16,6 +16,7 @@ import (
 	http "github.com/bruno-anjos/archimedesHTTPClient"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	originalHTTP "net/http"
 )
 
@@ -55,7 +56,6 @@ func getTransactionOffers(w http.ResponseWriter, _ *http.Request) {
 
 func makeTransaction(w http.ResponseWriter, r *http.Request) {
 	offerId := mux.Vars(r)[api.OfferIdPathVar]
-	log.Infof("Got transaction request for offer: %s", offerId)
 
 	offer, ok := offersMap[offerId]
 	if !ok {
@@ -70,6 +70,10 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger := log.WithField("REQ_ID", primitive.NewObjectID().Hex())
+
+	logger.Infof("Got request for %s from %s", offerId, authToken.Username)
+
 	trainerStatsToken, err := tokens.ExtractAndVerifyTrainerStatsToken(r.Header)
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusUnauthorized)
@@ -77,17 +81,21 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	trainersClient := clients.NewTrainersClient(httpClient, commsManager)
-	valid, err := trainersClient.VerifyTrainerStats(authToken.Username, trainerStatsToken.TrainerHash, r.Header.Get(tokens.AuthTokenHeaderName))
+	valid, err := trainersClient.VerifyTrainerStats(authToken.Username, trainerStatsToken.TrainerHash,
+		r.Header.Get(tokens.AuthTokenHeaderName))
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusUnauthorized)
 		return
 	}
 
 	if !*valid {
+		logger.Info("could not verify trainer stats")
 		err = wrapMakeTransactionError(tokens.ErrorInvalidStatsToken)
 		utils.LogAndSendHTTPError(&w, err, http.StatusUnauthorized)
 		return
 	}
+
+	logger.Infof("verified trainer stats")
 
 	makeTransactionWithBankEntity(offer)
 
@@ -98,9 +106,12 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 
 	id, err := transactionDB.AddTransaction(transactionRecord)
 	if err != nil {
+		logger.Info("could not add transaction")
 		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
 		return
 	}
+
+	logger.Info("added transaction")
 
 	newTrainerStats := utils.TrainerStats{
 		Level: trainerStatsToken.TrainerStats.Level,
@@ -110,12 +121,15 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 	newStats, err := trainersClient.UpdateTrainerStats(authToken.Username, newTrainerStats,
 		r.Header.Get(tokens.AuthTokenHeaderName))
 	if err != nil {
+		logger.Info("could not update trainer stats")
 		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusInternalServerError)
 		return
 	}
 
-	log.Infof("Previous Coins: %d", trainerStatsToken.TrainerStats.Coins)
-	log.Infof("Updated Coins: %d", newStats.Coins)
+	logger.Info("updated trainer stats")
+
+	logger.Infof("Previous Coins: %d", trainerStatsToken.TrainerStats.Coins)
+	logger.Infof("Updated Coins: %d", newStats.Coins)
 
 	w.Header().Set(tokens.StatsTokenHeaderName, trainersClient.TrainerStatsToken)
 
@@ -168,7 +182,7 @@ func loadOffers() (map[string]utils.TransactionTemplate, []byte, error) {
 		return nil, nil, wrapLoadOffersError(err)
 	}
 
-	var offersMapAux = make(map[string]utils.TransactionTemplate, len(offersArr))
+	offersMapAux := make(map[string]utils.TransactionTemplate, len(offersArr))
 	for _, offer := range offersArr {
 		offersMapAux[offer.Name] = offer
 	}
@@ -187,7 +201,7 @@ func makeTransactionWithBankEntity(offer utils.TransactionTemplate) {
 	log.Infof("Making transaction %s", offer.Name)
 
 	rand.Seed(time.Now().UnixNano())
-	n := rand.Intn(1500)
+	n := rand.Intn(500)
 	time.Sleep(time.Duration(n) * time.Millisecond)
 
 	return
