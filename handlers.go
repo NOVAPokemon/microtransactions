@@ -26,9 +26,8 @@ var (
 	marshaledOffers []byte
 	serverName      string
 	commsManager    websockets.CommunicationManager
+	httpClient      = &http.Client{Timeout: clients.RequestTimeout}
 )
-
-var httpClient = &http.Client{}
 
 func init() {
 	if aux, exists := os.LookupEnv(utils.HostnameEnvVar); exists {
@@ -77,7 +76,8 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	trainersClient := clients.NewTrainersClient(httpClient, commsManager)
-	valid, err := trainersClient.VerifyTrainerStats(authToken.Username, trainerStatsToken.TrainerHash, r.Header.Get(tokens.AuthTokenHeaderName))
+	valid, err := trainersClient.VerifyTrainerStats(authToken.Username, trainerStatsToken.TrainerHash,
+		r.Header.Get(tokens.AuthTokenHeaderName))
 	if err != nil {
 		utils.LogAndSendHTTPError(&w, wrapMakeTransactionError(err), http.StatusUnauthorized)
 		return
@@ -168,7 +168,7 @@ func loadOffers() (map[string]utils.TransactionTemplate, []byte, error) {
 		return nil, nil, wrapLoadOffersError(err)
 	}
 
-	var offersMapAux = make(map[string]utils.TransactionTemplate, len(offersArr))
+	offersMapAux := make(map[string]utils.TransactionTemplate, len(offersArr))
 	for _, offer := range offersArr {
 		offersMapAux[offer.Name] = offer
 	}
@@ -187,7 +187,7 @@ func makeTransactionWithBankEntity(offer utils.TransactionTemplate) {
 	log.Infof("Making transaction %s", offer.Name)
 
 	rand.Seed(time.Now().UnixNano())
-	n := rand.Intn(1500)
+	n := rand.Intn(500)
 	time.Sleep(time.Duration(n) * time.Millisecond)
 
 	return
