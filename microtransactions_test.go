@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	authClientTest         = clients.NewAuthClient(commsManager)
-	trainersClientTest     = clients.NewTrainersClient(&http.Client{}, commsManager)
-	transactionsClientTest = clients.NewMicrotransactionsClient(commsManager)
+	authClientTest         = clients.NewAuthClient(commsManager, &http.Client{}, basicClient)
+	trainersClientTest     = clients.NewTrainersClient(&http.Client{}, commsManager, basicClient)
+	transactionsClientTest = clients.NewMicrotransactionsClient(commsManager, &http.Client{}, basicClient)
 )
 
 func TestMain(m *testing.M) {

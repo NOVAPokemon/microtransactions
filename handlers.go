@@ -27,6 +27,7 @@ var (
 	serverName      string
 	commsManager    websockets.CommunicationManager
 	httpClient      = &http.Client{Timeout: clients.RequestTimeout}
+	basicClient     = clients.NewBasicClient(false, "")
 )
 
 func init() {
@@ -75,7 +76,7 @@ func makeTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trainersClient := clients.NewTrainersClient(httpClient, commsManager)
+	trainersClient := clients.NewTrainersClient(httpClient, commsManager, basicClient)
 	valid, err := trainersClient.VerifyTrainerStats(authToken.Username, trainerStatsToken.TrainerHash,
 		r.Header.Get(tokens.AuthTokenHeaderName))
 	if err != nil {
