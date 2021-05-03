@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	originalHTTP "net/http"
+
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/api"
 	"github.com/NOVAPokemon/utils/clients"
@@ -17,7 +19,6 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	originalHTTP "net/http"
 )
 
 const offersFile = "microtransaction_offers.json"
@@ -28,7 +29,12 @@ var (
 	marshaledOffers []byte
 	serverName      string
 	commsManager    websockets.CommunicationManager
-	httpClient      = &http.Client{Client: originalHTTP.Client{Timeout: clients.RequestTimeout}}
+	httpClient      = &http.Client{
+		Client: originalHTTP.Client{
+			Timeout:   clients.RequestTimeout,
+			Transport: clients.NewTransport(),
+		},
+	}
 )
 
 func init() {
