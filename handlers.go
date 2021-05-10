@@ -27,12 +27,10 @@ var (
 	serverName      string
 	commsManager    websockets.CommunicationManager
 	httpClient      = &http.Client{
-		Client: originalHTTP.Client{
-			Timeout:   clients.RequestTimeout,
-			Transport: clients.NewTransport(),
-		},
+		Timeout:   utils.Timeout,
+		Transport: clients.NewTransport(),
 	}
-	basicClient     = clients.NewBasicClient(false, "")
+	basicClient = clients.NewBasicClient(false, "")
 )
 
 func init() {
