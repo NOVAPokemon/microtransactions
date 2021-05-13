@@ -27,7 +27,7 @@ var (
 	serverName      string
 	commsManager    websockets.CommunicationManager
 	httpClient      = &http.Client{
-		Timeout:   utils.Timeout,
+		Timeout:   websockets.Timeout,
 		Transport: clients.NewTransport(),
 	}
 	basicClient = clients.NewBasicClient(false, "")
