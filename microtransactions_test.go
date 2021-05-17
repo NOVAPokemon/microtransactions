@@ -10,23 +10,23 @@ import (
 
 	"github.com/NOVAPokemon/utils"
 	"github.com/NOVAPokemon/utils/clients"
+	"github.com/NOVAPokemon/utils/websockets"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	originalHTTP "net/http"
 )
 
 var (
-	authClientTest         = clients.NewAuthClient(commsManager, httpClient)
-	trainersClientTest     = clients.NewTrainersClient(&http.Client{Client: originalHTTP.Client{Timeout: clients.RequestTimeout}}, commsManager)
+	authClientTest     = clients.NewAuthClient(commsManager, httpClient)
+	trainersClientTest = clients.NewTrainersClient(&http.Client{Client: originalHTTP.Client{Timeout: websockets.Timeout}},
+		commsManager)
 	transactionsClientTest = clients.NewMicrotransactionsClient(commsManager, httpClient)
 )
 
 func TestMain(m *testing.M) {
-
 	username := RandomString(10)
 	password := RandomString(10)
 	err := authClientTest.Register(username, password)
-
 	if err != nil {
 		logrus.Error(err)
 		return
@@ -52,9 +52,7 @@ func TestMain(m *testing.M) {
 
 // Location should be added
 func TestGetOffers(t *testing.T) {
-
 	transactions, err := transactionsClientTest.GetOffers()
-
 	if err != nil {
 		logrus.Error(err)
 		t.Error(err)
@@ -66,9 +64,7 @@ func TestGetOffers(t *testing.T) {
 
 // Location should be added
 func TestMakeTransaction(t *testing.T) {
-
 	offers, err := transactionsClientTest.GetOffers()
-
 	if err != nil {
 		logrus.Error(err)
 		t.Error(err)
@@ -76,7 +72,6 @@ func TestMakeTransaction(t *testing.T) {
 	}
 
 	id, updatedTkn, err := transactionsClientTest.PerformTransaction(offers[len(offers)-1].Name, authClientTest.AuthToken, trainersClientTest.TrainerStatsToken)
-
 	if err != nil {
 		logrus.Error(err)
 		t.Error(err)
@@ -86,7 +81,6 @@ func TestMakeTransaction(t *testing.T) {
 	t.Logf("Made transaction: %s", *id)
 
 	performedTransactions, err := transactionsClientTest.GetTransactionRecords(authClientTest.AuthToken)
-
 	if err != nil {
 		logrus.Error(err)
 		t.FailNow()
@@ -114,9 +108,7 @@ func TestMakeTransaction(t *testing.T) {
 }
 
 func TestGetPerformedTransactions(t *testing.T) {
-
 	performedTransactions, err := transactionsClientTest.GetTransactionRecords(authClientTest.AuthToken)
-
 	if err != nil {
 		logrus.Error(err)
 		t.FailNow()
@@ -126,7 +118,7 @@ func TestGetPerformedTransactions(t *testing.T) {
 }
 
 func RandomString(n int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 	rand.Seed(time.Now().Unix())
 
